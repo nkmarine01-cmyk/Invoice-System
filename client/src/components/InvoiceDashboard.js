@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axios from '../utils/axiosConfig';
 import { jsPDF } from 'jspdf';
 // eslint-disable-next-line no-unused-vars
 import autoTable from 'jspdf-autotable';
@@ -21,6 +21,8 @@ const InvoiceDashboard = () => {
       const res = await axios.get('http://localhost:5000/api/invoices');
       
       if (res.data.success) {
+        console.log('Fetched invoices:', res.data.data);
+        console.log('First invoice structure:', res.data.data[0]);
         setInvoices(res.data.data);
       }
     } catch (err) {
@@ -347,20 +349,20 @@ const InvoiceDashboard = () => {
             <tbody>
               {invoices.map((invoice) => (
                 <tr key={invoice._id}>
-                  <td className="invoice-number">{invoice.invoiceNumber}</td>
-                  <td className="customer-name">{invoice.customer.name}</td>
+                  <td className="invoice-number">{invoice.invoiceNumber || 'N/A'}</td>
+                  <td className="customer-name">{invoice.customer?.name || 'N/A'}</td>
                   <td className="invoice-date">{formatDate(invoice.invoiceDate)}</td>
-                  <td className="items-count">{invoice.items.length} items</td>
-                  <td className="grand-total">₹{parseFloat(invoice.calculations.grandTotal).toFixed(2)}</td>
+                  <td className="items-count">{invoice.items?.length || 0} items</td>
+                  <td className="grand-total">₹{invoice.calculations?.grandTotal ? parseFloat(invoice.calculations.grandTotal).toFixed(2) : '0.00'}</td>
                   <td className="actions">
                     <button
                       className="btn-view"
                       onClick={() => alert('View details coming soon!')}
                       title="View invoice"
                     >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" strokeWidth="2"/>
-                        <circle cx="12" cy="12" r="3" strokeWidth="2"/>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                        <circle cx="12" cy="12" r="3"/>
                       </svg>
                     </button>
                     <button
@@ -368,10 +370,10 @@ const InvoiceDashboard = () => {
                       onClick={() => handleDownloadPDF(invoice)}
                       title="Download PDF"
                     >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" strokeWidth="2"/>
-                        <polyline points="7 10 12 15 17 10" strokeWidth="2"/>
-                        <line x1="12" y1="15" x2="12" y2="3" strokeWidth="2"/>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7 10 12 15 17 10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
                       </svg>
                     </button>
                     <button
@@ -379,9 +381,9 @@ const InvoiceDashboard = () => {
                       onClick={() => handleDelete(invoice._id, invoice.invoiceNumber)}
                       title="Delete invoice"
                     >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <polyline points="3 6 5 6 21 6" strokeWidth="2"/>
-                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" strokeWidth="2"/>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <polyline points="3 6 5 6 21 6"/>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
                       </svg>
                     </button>
                   </td>

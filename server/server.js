@@ -14,8 +14,10 @@ const connectDB = require('./config/db');
 connectDB();
 
 // Routes - specific routes FIRST, then generic
+app.use('/api/auth', require('./routes/auth'));
 app.use('/api/items', require('./routes/items'));
 app.use('/api/invoices', require('./routes/invoices'));
+app.use('/api/quotations', require('./routes/quotations'));
 app.use('/api', require('./routes/api'));
 
 // Basic API route

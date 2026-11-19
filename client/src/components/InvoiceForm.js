@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { jsPDF } from 'jspdf';
-// eslint-disable-next-line no-unused-vars
-import autoTable from 'jspdf-autotable';
+import axios from '../utils/axiosConfig';
+import { generateMarineInvoicePDF } from '../utils/pdfGenerator';
 import PrintableInvoice from './PrintableInvoice';
 import './InvoiceForm.css';
 
@@ -20,6 +18,7 @@ const InvoiceForm = () => {
 
   const [availableItems, setAvailableItems] = useState([]);
   const [selectedItemId, setSelectedItemId] = useState('');
+  const [stagingItems, setStagingItems] = useState([]); // Items selected but not yet added to cart
   const [cartItems, setCartItems] = useState([]); // Items with qty, deno, rate
   const [gst, setGst] = useState(18); // GST percentage
   
@@ -124,31 +123,59 @@ const InvoiceForm = () => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
-  // Add item to cart with quantity and denomination
-  const handleAddItem = () => {
-    if (!selectedItemId) {
-      alert('Please select an item');
+  // Add item to staging area when selected from dropdown
+  const handleSelectItem = (itemId) => {
+    if (!itemId) return; // Empty selection
+    
+    const item = availableItems.find(i => i._id === itemId);
+    const existingInStaging = stagingItems.find(i => i._id === itemId);
+    const existingInCart = cartItems.find(i => i._id === itemId);
+
+    if (existingInStaging) {
+      alert('Item already in staging area');
+      setSelectedItemId(''); // Reset dropdown
       return;
     }
 
-    const item = availableItems.find(i => i._id === selectedItemId);
-    const existingItem = cartItems.find(i => i._id === selectedItemId);
-
-    if (existingItem) {
-      alert('Item already added. Please modify quantity in the summary below.');
+    if (existingInCart) {
+      alert('Item already added to summary. Please modify it there.');
+      setSelectedItemId(''); // Reset dropdown
       return;
-    } else {
-      // Add new item to cart
-      setCartItems([...cartItems, {
-        _id: item._id,
-        description: item.name,
-        quantity: 1,
-        deno: 'pieces', // denomination
-        rate: item.price
-      }]);
     }
+
+    // Add to staging area
+    setStagingItems([...stagingItems, {
+      _id: item._id,
+      description: item.name,
+      quantity: 1,
+      deno: 'pieces',
+      rate: item.price
+    }]);
 
     setSelectedItemId(''); // Reset dropdown
+  };
+
+  // Remove item from staging area
+  const removeStagingItem = (itemId) => {
+    setStagingItems(stagingItems.filter(item => item._id !== itemId));
+  };
+
+  // Update item in staging area
+  const updateStagingItem = (itemId, field, value) => {
+    setStagingItems(stagingItems.map(item =>
+      item._id === itemId ? { ...item, [field]: value } : item
+    ));
+  };
+
+  // Add all staging items to cart
+  const handleAddAllToCart = () => {
+    if (stagingItems.length === 0) {
+      alert('No items in staging area to add');
+      return;
+    }
+
+    setCartItems([...cartItems, ...stagingItems]);
+    setStagingItems([]); // Clear staging area
   };
 
   // Update item in cart
@@ -211,6 +238,11 @@ const InvoiceForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (stagingItems.length > 0) {
+      alert('You have items in the staging area. Please click "Add Items to Summary" button before saving the invoice.');
+      return;
+    }
+
     if (cartItems.length === 0) {
       alert('Please add at least one item to the invoice');
       return;
@@ -224,15 +256,23 @@ const InvoiceForm = () => {
     setLoading(true);
 
     try {
+      // Convert DD-MM-YYYY to ISO date format
+      const convertDateToISO = (dateStr) => {
+        const [day, month, year] = dateStr.split('-');
+        return new Date(`${year}-${month}-${day}`).toISOString();
+      };
+
       const invoicePayload = {
         invoiceNumber: invoiceData.invoiceNumber,
-        invoiceDate: invoiceData.invoiceDate,
-        customerName: invoiceData.customerName,
-        phoneNumber: invoiceData.phoneNumber,
-        email: invoiceData.email,
-        billingAddress: `${invoiceData.customerAddress}, ${invoiceData.customerCity}`,
-        customerGstin: invoiceData.gstin,
-        lineItems: cartItems.map(item => ({
+        invoiceDate: convertDateToISO(invoiceData.invoiceDate),
+        customer: {
+          name: invoiceData.customerName,
+          phoneNumber: invoiceData.phoneNumber,
+          email: invoiceData.email,
+          billingAddress: [invoiceData.customerAddress, invoiceData.customerCity].filter(Boolean).join(', ') || 'N/A',
+          gstin: invoiceData.gstin || ''
+        },
+        items: cartItems.map(item => ({
           itemId: item._id,
           itemName: item.description,
           price: item.rate,
@@ -243,14 +283,17 @@ const InvoiceForm = () => {
           discountType: 'percentage'
         })),
         calculations: {
-          subtotal: calculations.subtotal,
-          totalGST: calculations.totalGST,
-          grandTotal: calculations.finalTotal
+          subtotal: parseFloat(calculations.subtotal),
+          totalGST: parseFloat(calculations.totalGST),
+          totalDiscount: 0,
+          grandTotal: parseFloat(calculations.finalTotal)
         },
         gst: parseFloat(gst),
         discount: 0,
         discountType: 'fixed'
       };
+
+      console.log('Sending invoice payload:', JSON.stringify(invoicePayload, null, 2));
 
       const res = await axios.post('http://localhost:5000/api/invoices', invoicePayload);
 
@@ -259,9 +302,26 @@ const InvoiceForm = () => {
         handleReset();
       }
     } catch (err) {
-      console.error('Error saving invoice:', err);
-      const errorMessage = err.response?.data?.message || 'Failed to save invoice';
-      alert('Error: ' + (Array.isArray(errorMessage) ? errorMessage.join(', ') : errorMessage));
+      console.error('Full error object:', err);
+      console.error('Error response:', err.response);
+      console.error('Error response data:', err.response?.data);
+      
+      let errorMessage = 'Failed to save invoice';
+      
+      if (err.response?.data?.error) {
+        errorMessage = err.response.data.error;
+      } else if (err.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      
+      // If it's an array of errors, show all of them
+      if (Array.isArray(errorMessage)) {
+        alert('Validation Errors:\n' + errorMessage.join('\n'));
+      } else {
+        alert('Error: ' + errorMessage);
+      }
     } finally {
       setLoading(false);
     }
@@ -296,226 +356,26 @@ const InvoiceForm = () => {
       gstin: ''
     });
     setCartItems([]);
+    setStagingItems([]);
     setSelectedItemId('');
     setGst(18);
     setTouched({});
   };
 
-  const generatePDF = () => {
-    if (!invoiceData.customerName || cartItems.length === 0) {
-      alert('Please fill in customer details and add items before generating PDF');
-      return;
-    }
-
-    const doc = new jsPDF();
-    const pageWidth = 210;
-    const pageHeight = 297;
-    
-    // Add logo if available
+  const generatePDF = async () => {
     try {
-      const logo = new Image();
-      logo.src = '/assets/logo.png';
-      // Logo will be added at position (15, 10) with width 40
-      doc.addImage(logo, 'PNG', 15, 10, 40, 30);
-    } catch (err) {
-      console.log('Logo not found, skipping...');
+      console.log('Starting PDF generation...');
+      console.log('Invoice Data:', invoiceData);
+      console.log('Cart Items:', cartItems);
+      console.log('Calculations:', calculations);
+      console.log('GST:', gst);
+      await generateMarineInvoicePDF(invoiceData, cartItems, calculations, gst);
+      console.log('PDF generation completed successfully');
+    } catch (error) {
+      console.error('PDF generation error:', error);
+      console.error('Error stack:', error.stack);
+      alert('PDF Error: ' + error.message);
     }
-    
-    // Company Header Text (next to logo)
-    doc.setFontSize(9);
-    doc.setTextColor(80, 80, 80);
-    doc.setFont('helvetica', 'normal');
-    
-    const headerText = 'All Types Of Marine Engineering Solution, Engineering Turnkey Projects, Service In Mechanical, Electrical, Safety Items, Service In Mechanical & IT Solution';
-    const headerLines = doc.splitTextToSize(headerText, 130);
-    doc.text(headerLines, 60, 15);
-    
-    // GSTIN Number
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'bold');
-    doc.text('GSTIN Number : 29AAYFN4510A1Z8', 60, 32);
-    
-    // Horizontal line below header
-    doc.setDrawColor(150, 150, 150);
-    doc.setLineWidth(0.5);
-    doc.line(15, 42, 195, 42);
-    
-    // INVOICE Title (centered and underlined)
-    doc.setFontSize(16);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(0, 0, 0);
-    const invoiceText = 'INVOICE';
-    const invoiceWidth = doc.getTextWidth(invoiceText);
-    doc.text(invoiceText, (pageWidth - invoiceWidth) / 2, 52);
-    
-    // Underline INVOICE
-    const underlineY = 53;
-    doc.line((pageWidth - invoiceWidth) / 2, underlineY, (pageWidth + invoiceWidth) / 2, underlineY);
-    
-    // TO:- Section (Left)
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'bold');
-    doc.text('TO:-', 15, 62);
-    
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9);
-    doc.text(invoiceData.customerName.toUpperCase(), 15, 68);
-    doc.text(invoiceData.customerAddress.toUpperCase(), 15, 73);
-    doc.text(invoiceData.customerCity.toUpperCase(), 15, 78);
-    
-    // Tax Invoice Details (Right)
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(10);
-    doc.text(`TAX INVOICE NO. :${invoiceData.invoiceNumber}`, 195, 62, { align: 'right' });
-    doc.setFont('helvetica', 'normal');
-    doc.text(`DATE :-${invoiceData.invoiceDate}`, 195, 68, { align: 'right' });
-    
-    // Items Table
-    const tableStartY = 85;
-    const tableData = cartItems.map((item, index) => {
-      const amount = item.rate * item.quantity;
-      return [
-        index + 1,
-        item.description,
-        item.quantity.toString().padStart(2, '0'),
-        item.deno,
-        item.rate.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
-        amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-      ];
-    });
-    
-    // Add empty rows to match reference (at least 5-6 rows total)
-    const minRows = 6;
-    while (tableData.length < minRows) {
-      tableData.push(['', '', '', '', '', '']);
-    }
-    
-    autoTable(doc, {
-      startY: tableStartY,
-      head: [['SR.\nNO.', 'DESCRIPTION', 'QTY', 'DENO', 'RATE', 'AMOUNT']],
-      body: tableData,
-      foot: [
-        ['', '', '', '', 'SUB TOTAL', calculations.subtotal],
-        ['', '', '', '', `GST ${gst} %`, calculations.totalGST],
-        ['', '', '', '', 'TOTAL', calculations.grandTotal],
-        ['', '', '', '', 'Round off', calculations.finalTotal]
-      ],
-      theme: 'grid',
-      headStyles: {
-        fillColor: [255, 255, 255],
-        textColor: [0, 0, 0],
-        fontSize: 9,
-        fontStyle: 'bold',
-        lineWidth: 0.5,
-        lineColor: [0, 0, 0],
-        halign: 'center',
-        valign: 'middle',
-        cellPadding: 3
-      },
-      bodyStyles: {
-        fillColor: [255, 255, 255],
-        textColor: [0, 0, 0],
-        fontSize: 9,
-        lineWidth: 0.5,
-        lineColor: [0, 0, 0],
-        cellPadding: 3,
-        minCellHeight: 10
-      },
-      footStyles: {
-        fillColor: [255, 255, 255],
-        textColor: [0, 0, 0],
-        fontSize: 9,
-        fontStyle: 'bold',
-        lineWidth: 0.5,
-        lineColor: [0, 0, 0],
-        halign: 'right',
-        cellPadding: 3
-      },
-      columnStyles: {
-        0: { halign: 'center', cellWidth: 15 },
-        1: { halign: 'left', cellWidth: 85 },
-        2: { halign: 'center', cellWidth: 15 },
-        3: { halign: 'center', cellWidth: 20 },
-        4: { halign: 'right', cellWidth: 28 },
-        5: { halign: 'right', cellWidth: 32 }
-      },
-      margin: { left: 15, right: 15 },
-      tableLineColor: [0, 0, 0],
-      tableLineWidth: 0.5
-    });
-    
-    let finalY = doc.lastAutoTable.finalY + 5;
-    
-    // Amount in words
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'bold');
-    const amountInWords = numberToWords(Math.round(parseFloat(calculations.finalTotal)));
-    doc.text(`IN WORDS:- Rupees ${amountInWords}.`, 15, finalY + 5);
-    
-    // Bank Details (Left side)
-    finalY = finalY + 12;
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9);
-    doc.text(`Acc no. :- ${companyDetails.accountNo}`, 15, finalY);
-    doc.text(`IFSC :- ${companyDetails.ifsc}`, 15, finalY + 5);
-    doc.text(companyDetails.bankName, 15, finalY + 10);
-    
-    // Company Seal/Stamp placeholder (right side)
-    // Circle for stamp
-    doc.setDrawColor(0, 0, 255);
-    doc.setLineWidth(1);
-    doc.circle(160, finalY + 15, 15);
-    doc.setFontSize(8);
-    doc.setTextColor(0, 0, 255);
-    doc.text('M MARINE', 153, finalY + 12);
-    doc.text('SERVICES', 152, finalY + 16);
-    doc.text('KARWAR', 154, finalY + 20);
-    
-    // Signature text
-    doc.setTextColor(0, 0, 0);
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9);
-    doc.text('For M MARINE SERVICES', 195, finalY + 5, { align: 'right' });
-    
-    // Horizontal line above footer
-    doc.setDrawColor(150, 150, 150);
-    doc.setLineWidth(0.5);
-    doc.line(15, 255, 195, 255);
-    
-    // Footer - Contact Information (similar to reference)
-    doc.setFontSize(9);
-    doc.setTextColor(0, 0, 0);
-    
-    // Phone icon and number
-    doc.text('📞', 15, 265);
-    doc.text(`+91 ${companyDetails.phone}`, 20, 265);
-    
-    // Email icon and address
-    doc.text('✉', 90, 265);
-    doc.setTextColor(0, 0, 255);
-    doc.textWithLink(companyDetails.email, 95, 265, { url: `mailto:${companyDetails.email}` });
-    
-    // Location icon and address
-    doc.setTextColor(0, 0, 0);
-    doc.text('📍', 15, 272);
-    doc.text(companyDetails.address, 20, 272);
-    
-    // Blue vertical stripe on right edge (like reference)
-    doc.setFillColor(70, 130, 180);
-    doc.rect(200, 0, 10, pageHeight, 'F');
-    
-    // Blue diagonal accent (bottom right - like reference)
-    doc.setFillColor(70, 130, 180);
-    const trianglePoints = [
-      { x: 190, y: 250 },
-      { x: 210, y: 280 },
-      { x: 210, y: 250 }
-    ];
-    doc.triangle(trianglePoints[0].x, trianglePoints[0].y, 
-                 trianglePoints[1].x, trianglePoints[1].y, 
-                 trianglePoints[2].x, trianglePoints[2].y, 'F');
-    
-    doc.save(`M_Marine_Invoice_${invoiceData.invoiceNumber.replace(/\//g, '_')}.pdf`);
   };
 
   return (
@@ -640,30 +500,97 @@ const InvoiceForm = () => {
           {/* Add Item Section */}
           <div className="form-section">
             <h3 className="section-title">Add Items / Services</h3>
-            <div className="add-item-row">
-              <div className="form-group" style={{ flex: 1, marginBottom: 0 }}>
-                <label>Select Item <span className="required">*</span></label>
-                <select
-                  value={selectedItemId}
-                  onChange={(e) => setSelectedItemId(e.target.value)}
-                  className="item-select"
-                >
-                  <option value="">-- Select an item --</option>
-                  {availableItems.map(item => (
-                    <option key={item._id} value={item._id}>
-                      {item.name} - Rs. {item.price}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <button
-                type="button"
-                onClick={handleAddItem}
-                className="btn-add-item marine-btn"
+            
+            <div className="form-group">
+              <label>Select Item <span className="required">*</span></label>
+              <select
+                value={selectedItemId}
+                onChange={(e) => handleSelectItem(e.target.value)}
+                className="item-select-dropdown"
               >
-                + Add
-              </button>
+                <option value="">-- Select an item to add --</option>
+                {availableItems.map(item => (
+                  <option key={item._id} value={item._id}>
+                    {item.name} - Rs. {item.price}
+                  </option>
+                ))}
+              </select>
+              <small className="form-hint">Item will be added to staging area automatically when selected</small>
             </div>
+
+            {/* Staging Area */}
+            {stagingItems.length > 0 && (
+              <div className="staging-area">
+                <div className="staging-header">
+                  <h4>📦 Selected Items (Not added yet)</h4>
+                  <span className="staging-count">{stagingItems.length} item{stagingItems.length > 1 ? 's' : ''}</span>
+                </div>
+                
+                <div className="staging-items-list">
+                  {stagingItems.map((item, index) => (
+                    <div key={item._id} className="staging-item-card">
+                      <div className="staging-item-number">{index + 1}</div>
+                      <div className="staging-item-details">
+                        <h5>{item.description}</h5>
+                        <div className="staging-item-inputs">
+                          <div className="staging-input-group">
+                            <label>QTY</label>
+                            <input
+                              type="number"
+                              value={item.quantity}
+                              onChange={(e) => updateStagingItem(item._id, 'quantity', parseInt(e.target.value) || 1)}
+                              min="1"
+                              className="staging-input"
+                            />
+                          </div>
+                          <div className="staging-input-group">
+                            <label>DENO</label>
+                            <input
+                              type="text"
+                              value={item.deno}
+                              onChange={(e) => updateStagingItem(item._id, 'deno', e.target.value)}
+                              className="staging-input"
+                              placeholder="pieces"
+                            />
+                          </div>
+                          <div className="staging-input-group">
+                            <label>RATE</label>
+                            <input
+                              type="number"
+                              value={item.rate}
+                              onChange={(e) => updateStagingItem(item._id, 'rate', parseFloat(e.target.value) || 0)}
+                              min="0"
+                              step="0.01"
+                              className="staging-input"
+                            />
+                          </div>
+                          <div className="staging-amount">
+                            <label>Amount</label>
+                            <div className="amount-value">Rs. {(item.rate * item.quantity).toFixed(2)}</div>
+                          </div>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeStagingItem(item._id)}
+                        className="btn-remove-staging"
+                        title="Remove from selection"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleAddAllToCart}
+                  className="btn-add-all-to-cart marine-btn-primary"
+                >
+                  ✓ Add {stagingItems.length} Item{stagingItems.length > 1 ? 's' : ''} to Summary
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Cart Items Summary */}

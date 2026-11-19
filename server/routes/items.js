@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const authMiddleware = require('../middleware/authMiddleware');
 const {
   getItems,
   getItem,
@@ -7,6 +8,9 @@ const {
   updateItem,
   deleteItem
 } = require('../controllers/itemController');
+
+// Apply auth middleware to all routes
+router.use(authMiddleware);
 
 router.route('/')
   .get(getItems)

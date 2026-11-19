@@ -63,6 +63,26 @@ PORT=5000
 MONGO_URI=mongodb+srv://your_username:your_password@cluster.mongodb.net/invoice_management
 ```
 
+### Initial Setup - Create Admin User
+
+Before running the application for the first time, create the initial admin user:
+
+```bash
+# Navigate to server directory
+cd server
+
+# Run the seed script
+npm run seed:user
+```
+
+**Default Login Credentials:**
+- Username: `admin`
+- Password: `admin123`
+
+⚠️ **Important:** Change the default password after first login in production!
+
+For detailed instructions, see [server/SEED_SETUP.md](server/SEED_SETUP.md)
+
 ### Running the Application
 
 ```bash

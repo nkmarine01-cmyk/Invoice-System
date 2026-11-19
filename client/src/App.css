@@ -1,15 +1,57 @@
+/* Modern UI with Smooth Animations - M Marine Services */
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Animated Ocean Wave Background */
+@keyframes wave {
+  0% {
+    transform: translateX(0) translateZ(0) scaleY(1);
+  }
+  50% {
+    transform: translateX(-25%) translateZ(0) scaleY(0.8);
+  }
+  100% {
+    transform: translateX(-50%) translateZ(0) scaleY(1);
+  }
+}
+
 .App {
   min-height: 100vh;
-  background: #f5f5f5;
+  background: linear-gradient(135deg, #e3f2fd 0%, #f5f5f5 100%);
   display: flex;
   flex-direction: column;
   position: relative;
+  overflow-x: hidden;
+}
+
+/* Animated wave decoration */
+.App::before {
+  content: '';
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 200%;
+  height: 200px;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120"><path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z" opacity=".15" fill="%234682b4"/><path d="M0,0V15.81C13,36.92,27.64,56.86,47.69,72.05,99.41,111.27,165,111,224.58,91.58c31.15-10.15,60.09-26.07,89.67-39.8,40.92-19,84.73-46,130.83-49.67,36.26-2.85,70.9,9.42,98.6,31.56,31.77,25.39,62.32,62,103.63,73,40.44,10.79,81.35-6.69,119.13-24.28s75.16-39,116.92-43.05c59.73-5.85,113.28,22.88,168.9,38.84,30.2,8.66,59,6.17,87.09-7.5,22.43-10.89,48-26.93,60.65-49.24V0Z" opacity=".25" fill="%234682b4"/><path d="M0,0V5.63C149.93,59,314.09,71.32,475.83,42.57c43-7.64,84.23-20.12,127.61-26.46,59-8.63,112.48,12.24,165.56,35.4C827.93,77.22,886,95.24,951.2,90c86.53-7,172.46-45.71,248.8-84.81V0Z" fill="%234682b4"/></svg>') repeat-x;
+  background-size: 50% 100%;
+  animation: wave 20s linear infinite;
+  opacity: 0.3;
+  z-index: 0;
+  pointer-events: none;
 }
 
 .app-header,
@@ -19,95 +61,347 @@
   z-index: 1;
 }
 
+/* Header with glassmorphism effect */
 .app-header {
-  background: linear-gradient(135deg, #4682b4 0%, #5a9bd4 100%);
-  padding: 24px 20px;
-  border-bottom: 3px solid #3a6fa0;
-  box-shadow: 0 4px 12px rgba(70, 130, 180, 0.3);
+  background: linear-gradient(135deg, rgba(70, 130, 180, 0.95) 0%, rgba(90, 155, 212, 0.95) 100%);
+  backdrop-filter: blur(10px);
+  padding: 28px 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px rgba(70, 130, 180, 0.3);
+  animation: slideDown 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 .header-content {
-  max-width: 1200px;
+  max-width: 1280px;
   margin: 0 auto;
 }
 
 .header-content h1 {
   color: white;
-  font-size: 28px;
-  margin-bottom: 4px;
-  font-weight: 600;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  font-size: 32px;
+  margin-bottom: 6px;
+  font-weight: 800;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  letter-spacing: -0.5px;
+  animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .header-content p {
   color: rgba(255, 255, 255, 0.95);
-  font-size: 14px;
-  margin-bottom: 16px;
+  font-size: 15px;
+  margin-bottom: 20px;
+  font-weight: 400;
+  animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
 }
 
+/* Modern Tab Navigation with smooth transitions */
 .nav-tabs {
   display: flex;
-  gap: 8px;
-  margin-top: 16px;
+  gap: 12px;
+  margin-top: 20px;
+  animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.4s both;
 }
 
 .nav-tab {
-  padding: 10px 20px;
-  background: rgba(255, 255, 255, 0.2);
-  border: none;
-  border-bottom: 3px solid transparent;
+  position: relative;
+  padding: 12px 28px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   color: white;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s;
-  border-radius: 8px 8px 0 0;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  overflow: hidden;
+}
+
+/* Ripple effect on click */
+.nav-tab::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.nav-tab:active::before {
+  width: 300px;
+  height: 300px;
 }
 
 .nav-tab:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
 }
 
 .nav-tab.active {
   background: white;
   color: #4682b4;
-  border-bottom-color: #4682b4;
-  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15), 0 0 0 3px rgba(255, 255, 255, 0.3);
+  border-color: white;
 }
 
+.nav-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40%;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #4682b4, transparent);
+  border-radius: 3px 3px 0 0;
+  animation: expandWidth 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes expandWidth {
+  from {
+    width: 0;
+  }
+  to {
+    width: 40%;
+  }
+}
+
+/* Main content area with fade-in */
 .app-main {
   flex: 1;
-  padding: 32px 20px;
-  background: #f5f5f5;
+  padding: 40px 24px;
+  background: transparent;
+  animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .container {
-  max-width: 1200px;
+  max-width: 1280px;
   margin: 0 auto;
+  animation: scaleIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Footer with slide-up animation */
 .app-footer {
-  background: linear-gradient(135deg, #4682b4 0%, #5a9bd4 100%);
-  border-top: 3px solid #3a6fa0;
+  background: linear-gradient(135deg, rgba(70, 130, 180, 0.95) 0%, rgba(90, 155, 212, 0.95) 100%);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
   color: white;
   text-align: center;
-  padding: 16px;
-  font-size: 13px;
-  box-shadow: 0 -4px 12px rgba(70, 130, 180, 0.3);
+  padding: 20px;
+  font-size: 14px;
+  box-shadow: 0 -8px 32px rgba(70, 130, 180, 0.3);
+  animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 .app-footer p {
   margin: 0;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  font-weight: 500;
 }
 
+/* Smooth page transitions */
+.page-transition-enter {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.page-transition-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.4s, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.page-transition-exit {
+  opacity: 1;
+}
+
+.page-transition-exit-active {
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
   .header-content h1 {
-    font-size: 22px;
+    font-size: 24px;
+  }
+
+  .header-content p {
+    font-size: 13px;
+  }
+
+  .nav-tabs {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .nav-tab {
+    padding: 10px 20px;
+    font-size: 14px;
   }
 
   .app-main {
-    padding: 20px 12px;
+    padding: 24px 16px;
+  }
+}
+
+/* Loading spinner animation */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spinner {
+  border: 3px solid rgba(70, 130, 180, 0.2);
+  border-top-color: #4682b4;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 0.8s linear infinite;
+}
+
+/* Pulse animation for loading states */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Smooth hover lift effect for cards */
+.card-hover {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+              box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-hover:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(70, 130, 180, 0.25);
+}
+
+/* Smooth focus ring for accessibility */
+*:focus-visible {
+  outline: 3px solid rgba(70, 130, 180, 0.5);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Header Top Section with Logout Button */
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+/* Logout Button with Marine Theme */
+.logout-button {
+  padding: 10px 24px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.logout-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+.logout-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive adjustments for logout button */
+@media (max-width: 768px) {
+  .header-top {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+  }
+
+  .logout-button {
+    align-self: flex-end;
+    padding: 8px 20px;
+    font-size: 13px;
   }
 }

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import axios from '../utils/axiosConfig';
 import './ItemForm.css';
 
 const ItemForm = ({ onItemAdded }) => {
@@ -54,7 +54,6 @@ const ItemForm = ({ onItemAdded }) => {
     e.preventDefault();
     
     if (!validateForm()) {
-      setLoading(false);
       return;
     }
 
@@ -67,7 +66,7 @@ const ItemForm = ({ onItemAdded }) => {
         ? variants.split(',').map(v => v.trim()).filter(v => v)
         : [];
 
-      const res = await axios.post('http://localhost:5000/api/items', {
+      const res = await axios.post('/api/items', {
         name: name.trim(),
         description: description.trim(),
         variants: variantsArray,
@@ -93,6 +92,7 @@ const ItemForm = ({ onItemAdded }) => {
         setTimeout(() => setSuccess(''), 3000);
       }
     } catch (err) {
+      console.error('Error adding item:', err);
       setError(
         err.response?.data?.error || 'Failed to add item. Please try again.'
       );

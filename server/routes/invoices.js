@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const authMiddleware = require('../middleware/authMiddleware');
 const {
   getInvoices,
   getInvoice,
@@ -7,6 +8,9 @@ const {
   updateInvoice,
   deleteInvoice
 } = require('../controllers/invoiceController');
+
+// Apply auth middleware to all routes
+router.use(authMiddleware);
 
 router.route('/')
   .get(getInvoices)
