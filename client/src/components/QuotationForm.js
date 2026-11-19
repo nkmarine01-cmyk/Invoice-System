@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from '../utils/axiosConfig';
+import axios from 'axios';
+import API_URL from '../config';
 import { generateMarineQuotationPDF } from '../utils/pdfGenerator';
 import PrintableQuotation from './PrintableQuotation';
 import './QuotationForm.css';
@@ -51,7 +52,7 @@ const QuotationForm = () => {
   useEffect(() => {
     const fetchItems = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/items');
+        const res = await axios.get(`${API_URL}/api/items`);
         if (res.data.success) {
           setAvailableItems(res.data.data);
         }
@@ -295,7 +296,7 @@ const QuotationForm = () => {
 
       console.log('Sending Quotation payload:', JSON.stringify(QuotationPayload, null, 2));
 
-      const res = await axios.post('http://localhost:5000/api/Quotations', QuotationPayload);
+      const res = await axios.post(`${API_URL}/api/Quotations`, QuotationPayload);
 
       if (res.data.success) {
         alert('Quotation saved successfully!');

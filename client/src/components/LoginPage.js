@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
+import API_URL from '../config';
 import './LoginPage.css';
 
 function LoginPage() {
@@ -31,7 +32,7 @@ function LoginPage() {
     setIsLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/login', {
+      const response = await axios.post(`${API_URL}/api/auth/login`, {
         username: username.trim(),
         password
       });
@@ -134,10 +135,6 @@ function LoginPage() {
             )}
           </button>
         </form>
-
-        <div className="login-hint">
-          <p>Default: admin / admin123</p>
-        </div>
       </div>
     </div>
   );

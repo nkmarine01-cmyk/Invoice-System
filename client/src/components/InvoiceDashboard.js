@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from '../utils/axiosConfig';
+import axios from 'axios';
+import API_URL from '../config';
 import { jsPDF } from 'jspdf';
 // eslint-disable-next-line no-unused-vars
 import autoTable from 'jspdf-autotable';
@@ -18,7 +19,7 @@ const InvoiceDashboard = () => {
     try {
       setLoading(true);
       setError('');
-      const res = await axios.get('http://localhost:5000/api/invoices');
+      const res = await axios.get(`${API_URL}/api/invoices`);
       
       if (res.data.success) {
         console.log('Fetched invoices:', res.data.data);
@@ -39,7 +40,7 @@ const InvoiceDashboard = () => {
     }
 
     try {
-      const res = await axios.delete(`http://localhost:5000/api/invoices/${id}`);
+      const res = await axios.delete(`${API_URL}/api/invoices/${id}`);
       
       if (res.data.success) {
         setInvoices(invoices.filter(invoice => invoice._id !== id));

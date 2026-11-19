@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from '../utils/axiosConfig';
+import axios from 'axios';
+import API_URL from '../config';
 import './ItemList.css';
 
 const ItemList = ({ refreshTrigger }) => {
@@ -10,7 +11,7 @@ const ItemList = ({ refreshTrigger }) => {
   const fetchItems = async () => {
     try {
       setLoading(true);
-      const res = await axios.get('http://localhost:5000/api/items');
+      const res = await axios.get(`${API_URL}/api/items`);
       
       if (res.data.success) {
         setItems(res.data.data);
@@ -34,7 +35,7 @@ const ItemList = ({ refreshTrigger }) => {
     }
 
     try {
-      const res = await axios.delete(`http://localhost:5000/api/items/${id}`);
+      const res = await axios.delete(`${API_URL}/api/items/${id}`);
       
       if (res.data.success) {
         setItems(items.filter(item => item._id !== id));

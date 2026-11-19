@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import axios from '../utils/axiosConfig';
+import axios from 'axios';
+import API_URL from '../config';
 import './ItemForm.css';
 
 const ItemForm = ({ onItemAdded }) => {
@@ -66,7 +67,7 @@ const ItemForm = ({ onItemAdded }) => {
         ? variants.split(',').map(v => v.trim()).filter(v => v)
         : [];
 
-      const res = await axios.post('/api/items', {
+      const res = await axios.post(`${API_URL}/api/items`, {
         name: name.trim(),
         description: description.trim(),
         variants: variantsArray,

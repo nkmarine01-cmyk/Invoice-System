@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from '../utils/axiosConfig';
+import axios from 'axios';
+import API_URL from '../config';
 import { generateMarineInvoicePDF } from '../utils/pdfGenerator';
 import PrintableInvoice from './PrintableInvoice';
 import './InvoiceForm.css';
@@ -51,7 +52,7 @@ const InvoiceForm = () => {
   useEffect(() => {
     const fetchItems = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/items');
+        const res = await axios.get(`${API_URL}/api/items`);
         if (res.data.success) {
           setAvailableItems(res.data.data);
         }
@@ -295,7 +296,7 @@ const InvoiceForm = () => {
 
       console.log('Sending invoice payload:', JSON.stringify(invoicePayload, null, 2));
 
-      const res = await axios.post('http://localhost:5000/api/invoices', invoicePayload);
+      const res = await axios.post(`${API_URL}/api/invoices`, invoicePayload);
 
       if (res.data.success) {
         alert('Invoice saved successfully!');
