@@ -15,6 +15,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "serve": "serve -s build -l $PORT",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
@@ -37,6 +38,7 @@
   },
   "devDependencies": {
     "fast-check": "^4.10.2",
-    "pdf-parse": "^2.4.5"
+    "pdf-parse": "^2.4.5",
+    "serve": "^14.2.8"
   }
 }
