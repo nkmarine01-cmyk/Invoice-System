@@ -11,6 +11,7 @@ import InvoiceDashboard from './components/InvoiceDashboard';
 import QuotationForm from './components/QuotationForm';
 import QuotationDashboard from './components/QuotationDashboard';
 import './App.css';
+import './axiosConfig'; // Initialize axios interceptors
 
 // Main application content component (protected routes)
 function MainApp() {
