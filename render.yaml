@@ -1,12 +1,10 @@
 services:
   # Backend API
   - type: web
-    name: invoice-system-api
+    name: invoice-system
     env: node
-    region: oregon
-    plan: free
     buildCommand: cd server && npm install
-    startCommand: cd server && npm start
+    startCommand: cd server && node server.js
     envVars:
       - key: NODE_ENV
         value: production
@@ -14,17 +12,13 @@ services:
         sync: false
       - key: JWT_SECRET
         sync: false
-      - key: PORT
-        value: 5000
 
-  # Frontend (Static Site)
+  # Frontend Static Site
   - type: web
     name: invoice-system-frontend
     env: static
-    region: oregon
-    plan: free
     buildCommand: cd client && npm install && npm run build
-    staticPublishPath: ./client/build
+    staticPublishPath: client/build
     envVars:
       - key: REACT_APP_API_URL
         sync: false
