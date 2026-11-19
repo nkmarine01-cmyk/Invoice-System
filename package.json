@@ -1,26 +1,9 @@
 {
-  "name": "mern-app",
+  "name": "invoice-management-system",
   "version": "1.0.0",
-  "description": "Full-stack MERN application",
-  "main": "server/server.js",
   "scripts": {
-    "server": "cd server && npm run dev",
-    "client": "cd client && npm start",
-    "dev": "concurrently \"npm run server\" \"npm run client\"",
-    "install-server": "cd server && npm install",
-    "install-client": "cd client && npm install",
-    "install-all": "npm run install-server && npm run install-client"
-  },
-  "keywords": [
-    "mern",
-    "mongodb",
-    "express",
-    "react",
-    "nodejs"
-  ],
-  "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "concurrently": "^8.0.1"
+    "build": "cd client && npm install && npm run build",
+    "start": "cd client && node server.js",
+    "install-client": "cd client && npm install"
   }
 }
