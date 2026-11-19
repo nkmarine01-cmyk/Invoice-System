@@ -19,7 +19,7 @@ if (fs.existsSync(buildPath)) {
 app.use(express.static(buildPath));
 
 // Handle React routing, return all requests to React app
-app.get('*', (req, res) => {
+app.get('/*', (req, res) => {
   const indexPath = path.join(buildPath, 'index.html');
   console.log('Serving:', indexPath);
   console.log('Index.html exists:', fs.existsSync(indexPath));
