@@ -27,9 +27,16 @@ app.use(express.json());
 
 // MongoDB Connection
 const connectDB = require('./config/db');
-connectDB();
+const { autoSetup } = require('./utils/autoSetup');
+
+// Connect to MongoDB and run auto-setup
+connectDB().then(() => {
+  // Run auto-setup after DB connection is established
+  autoSetup();
+});
 
 // Routes - specific routes FIRST, then generic
+app.use('/api/setup', require('./routes/setup'));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/items', require('./routes/items'));
 app.use('/api/invoices', require('./routes/invoices'));
