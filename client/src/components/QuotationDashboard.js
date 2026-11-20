@@ -271,14 +271,14 @@ const QuotationDashboard = () => {
 
   if (loading) {
     return (
-      <div className="Quotation-dashboard">
+      <div className="invoice-dashboard">
         <div className="dashboard-header">
           <h1>Quotation Dashboard</h1>
-          <p>View and manage all Quotations</p>
+          <p>View and manage all quotations</p>
         </div>
         <div className="loading-container">
           <div className="spinner"></div>
-          <p>Loading Quotations...</p>
+          <p>Loading quotations...</p>
         </div>
       </div>
     );
@@ -286,10 +286,10 @@ const QuotationDashboard = () => {
 
   if (error) {
     return (
-      <div className="Quotation-dashboard">
+      <div className="invoice-dashboard">
         <div className="dashboard-header">
           <h1>Quotation Dashboard</h1>
-          <p>View and manage all Quotations</p>
+          <p>View and manage all quotations</p>
         </div>
         <div className="error-container">
           <p>{error}</p>
@@ -302,11 +302,11 @@ const QuotationDashboard = () => {
   }
 
   return (
-    <div className="Quotation-dashboard">
+    <div className="invoice-dashboard">
       <div className="dashboard-header">
         <div>
           <h1>Quotation Dashboard</h1>
-          <p>View and manage all Quotations</p>
+          <p>View and manage all quotations</p>
         </div>
         <div className="dashboard-stats">
           <div className="stat-card">
@@ -331,12 +331,12 @@ const QuotationDashboard = () => {
             <line x1="16" y1="17" x2="8" y2="17" strokeWidth="2"/>
             <polyline points="10 9 9 9 8 9" strokeWidth="2"/>
           </svg>
-          <h3>No Quotations yet</h3>
-          <p>Create your first Quotation to see it here</p>
+          <h3>No quotations yet</h3>
+          <p>Create your first quotation to see it here</p>
         </div>
       ) : (
         <div className="table-container">
-          <table className="Quotation-table">
+          <table className="invoice-table">
             <thead>
               <tr>
                 <th>Quotation Number</th>
@@ -350,16 +350,16 @@ const QuotationDashboard = () => {
             <tbody>
               {Quotations.map((Quotation) => (
                 <tr key={Quotation._id}>
-                  <td className="Quotation-number">{Quotation.QuotationNumber || 'N/A'}</td>
+                  <td className="invoice-number">{Quotation.QuotationNumber || 'N/A'}</td>
                   <td className="customer-name">{Quotation.customer?.name || 'N/A'}</td>
-                  <td className="Quotation-date">{formatDate(Quotation.QuotationDate)}</td>
+                  <td className="invoice-date">{formatDate(Quotation.QuotationDate)}</td>
                   <td className="items-count">{Quotation.items?.length || 0} items</td>
                   <td className="grand-total">₹{Quotation.calculations?.grandTotal ? parseFloat(Quotation.calculations.grandTotal).toFixed(2) : '0.00'}</td>
                   <td className="actions">
                     <button
                       className="btn-view"
                       onClick={() => alert('View details coming soon!')}
-                      title="View Quotation"
+                      title="View quotation"
                     >
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
@@ -378,9 +378,9 @@ const QuotationDashboard = () => {
                       </svg>
                     </button>
                     <button
-                      className="btn-delete-Quotation"
+                      className="btn-delete-invoice"
                       onClick={() => handleDelete(Quotation._id, Quotation.QuotationNumber)}
-                      title="Delete Quotation"
+                      title="Delete quotation"
                     >
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <polyline points="3 6 5 6 21 6"/>

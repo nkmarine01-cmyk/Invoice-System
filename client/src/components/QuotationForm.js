@@ -536,13 +536,80 @@ const QuotationForm = () => {
                         <div className="staging-item-inputs">
                           <div className="staging-input-group">
                             <label>QTY</label>
-                            <input
-                              type="number"
-                              value={item.quantity}
-                              onChange={(e) => updateStagingItem(item._id, 'quantity', parseInt(e.target.value) || 1)}
-                              min="1"
-                              className="staging-input"
-                            />
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <button
+                                type="button"
+                                onClick={() => updateStagingItem(item._id, 'quantity', Math.max(1, item.quantity - 1))}
+                                className="qty-btn"
+                                style={{
+                                  width: '32px',
+                                  height: '32px',
+                                  border: '2px solid #e2e8f0',
+                                  borderRadius: '6px',
+                                  background: 'white',
+                                  cursor: 'pointer',
+                                  fontSize: '18px',
+                                  fontWeight: 'bold',
+                                  color: '#64748b',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  transition: 'all 0.2s ease'
+                                }}
+                                onMouseEnter={(e) => {
+                                  e.target.style.background = '#4682b4';
+                                  e.target.style.color = 'white';
+                                  e.target.style.borderColor = '#4682b4';
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.target.style.background = 'white';
+                                  e.target.style.color = '#64748b';
+                                  e.target.style.borderColor = '#e2e8f0';
+                                }}
+                              >
+                                −
+                              </button>
+                              <input
+                                type="number"
+                                value={item.quantity}
+                                onChange={(e) => updateStagingItem(item._id, 'quantity', parseInt(e.target.value) || 1)}
+                                min="1"
+                                className="staging-input"
+                                style={{ width: '60px', textAlign: 'center' }}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => updateStagingItem(item._id, 'quantity', item.quantity + 1)}
+                                className="qty-btn"
+                                style={{
+                                  width: '32px',
+                                  height: '32px',
+                                  border: '2px solid #e2e8f0',
+                                  borderRadius: '6px',
+                                  background: 'white',
+                                  cursor: 'pointer',
+                                  fontSize: '18px',
+                                  fontWeight: 'bold',
+                                  color: '#64748b',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  transition: 'all 0.2s ease'
+                                }}
+                                onMouseEnter={(e) => {
+                                  e.target.style.background = '#10b981';
+                                  e.target.style.color = 'white';
+                                  e.target.style.borderColor = '#10b981';
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.target.style.background = 'white';
+                                  e.target.style.color = '#64748b';
+                                  e.target.style.borderColor = '#e2e8f0';
+                                }}
+                              >
+                                +
+                              </button>
+                            </div>
                           </div>
                           <div className="staging-input-group">
                             <label>DENO</label>
@@ -621,13 +688,78 @@ const QuotationForm = () => {
                         <td>{index + 1}</td>
                         <td>{item.description}</td>
                         <td>
-                          <input
-                            type="number"
-                            value={item.quantity}
-                            onChange={(e) => updateCartItem(item._id, 'quantity', parseInt(e.target.value) || 1)}
-                            min="1"
-                            className="table-input"
-                          />
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
+                            <button
+                              type="button"
+                              onClick={() => updateCartItem(item._id, 'quantity', Math.max(1, item.quantity - 1))}
+                              style={{
+                                width: '28px',
+                                height: '28px',
+                                border: '2px solid #e2e8f0',
+                                borderRadius: '6px',
+                                background: 'white',
+                                cursor: 'pointer',
+                                fontSize: '16px',
+                                fontWeight: 'bold',
+                                color: '#64748b',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                transition: 'all 0.2s ease'
+                              }}
+                              onMouseEnter={(e) => {
+                                e.target.style.background = '#4682b4';
+                                e.target.style.color = 'white';
+                                e.target.style.borderColor = '#4682b4';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.target.style.background = 'white';
+                                e.target.style.color = '#64748b';
+                                e.target.style.borderColor = '#e2e8f0';
+                              }}
+                            >
+                              −
+                            </button>
+                            <input
+                              type="number"
+                              value={item.quantity}
+                              onChange={(e) => updateCartItem(item._id, 'quantity', parseInt(e.target.value) || 1)}
+                              min="1"
+                              className="table-input"
+                              style={{ width: '50px', textAlign: 'center' }}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => updateCartItem(item._id, 'quantity', item.quantity + 1)}
+                              style={{
+                                width: '28px',
+                                height: '28px',
+                                border: '2px solid #e2e8f0',
+                                borderRadius: '6px',
+                                background: 'white',
+                                cursor: 'pointer',
+                                fontSize: '16px',
+                                fontWeight: 'bold',
+                                color: '#64748b',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                transition: 'all 0.2s ease'
+                              }}
+                              onMouseEnter={(e) => {
+                                e.target.style.background = '#10b981';
+                                e.target.style.color = 'white';
+                                e.target.style.borderColor = '#10b981';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.target.style.background = 'white';
+                                e.target.style.color = '#64748b';
+                                e.target.style.borderColor = '#e2e8f0';
+                              }}
+                            >
+                              +
+                            </button>
+                          </div>
                         </td>
                         <td>
                           <input
